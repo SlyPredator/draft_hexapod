@@ -787,7 +787,7 @@ class SpecEmitter:
         shape = g.get('shape', 'cylinder')
         color = g.get('color', '0.5 0.5 0.5 1')
         rho = float(g.get('rho', self._params.get('motor_rho', 2700.0)))
-        r = float(g['r'])
+        r = float(g.get('r', 0.0))
         mass = float(g['mass']) if 'mass' in g else None
 
         # Default role `other`: raw primitives are not counted as limb structure.

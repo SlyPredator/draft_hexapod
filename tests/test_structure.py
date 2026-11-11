@@ -23,6 +23,7 @@ BY_CONTRACT = {
     "draft.generation.root_mesh",
     # Re-exported lazily by name so `speed_limits` imports without mjlab.
     "draft.tasks.quadruped.env",
+    "draft.tasks.hexapod.env",
 }
 
 

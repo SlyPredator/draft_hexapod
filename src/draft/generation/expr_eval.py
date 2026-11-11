@@ -4,13 +4,14 @@ import re
 from typing import Any
 
 from .mounting import (edge_outward_normal, edge_point, mount_euler, mount_pos,
-                       rect_outline)
+                       rect_outline, regular_polygon)
 
 # Names an expression may use: arithmetic plus root-outline placement helpers.
 _SAFE = {'pi': math.pi, 'abs': abs, 'min': min, 'max': max, 'sqrt': math.sqrt,
+         'sin': math.sin, 'cos': math.cos, 'tan': math.tan, 'atan2': math.atan2,
          'len': len, 'round': round,
          'mount_pos': mount_pos, 'mount_euler': mount_euler,
-         'rect_outline': rect_outline,
+         'rect_outline': rect_outline, 'regular_polygon': regular_polygon,
          'edge_point': edge_point, 'edge_outward_normal': edge_outward_normal}
 
 

@@ -17,6 +17,7 @@ from draft.robots import available, robot_dir
 EXPECTED_MASS_KG = {
     "humanoid": 53.7210,
     "quadruped": 31.9348,
+    "hexapod": 18.6033,
 }
 
 #: The paper's §V designs (overrides over the quadruped).
@@ -32,6 +33,7 @@ VARIANT_MASS_KG = {
                   "hand", "waist_link", "torso", "hip_link", "thigh", "shank",
                   "foot"}),
     ("quadruped", {"hip_link", "thigh", "shank"}),
+    ("hexapod", {"coxa", "femur", "tibia"}),
 ])
 def test_every_member_weighs_its_structural_trend(tmp_path, robot, classes):
     """Each member weighs its class trend's mass, minus fixed mass in the segment
@@ -64,7 +66,7 @@ def _total_mass(out: Path) -> float:
 
 def test_every_shipped_robot_is_discoverable():
     """Robots are discovered from their directories."""
-    assert set(available()) == {"humanoid", "quadruped"}
+    assert set(available()) == {"humanoid", "quadruped", "hexapod"}
 
 
 @pytest.mark.parametrize("robot", sorted(EXPECTED_MASS_KG))

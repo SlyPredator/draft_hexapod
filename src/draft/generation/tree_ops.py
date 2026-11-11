@@ -49,6 +49,7 @@ def rgba(color: Any) -> list:
 _PREFIX_PAIRS = [
     ('left_', 'right_'), ('right_', 'left_'),
     ('fl_', 'fr_'),  ('fr_', 'fl_'),
+    ('ml_', 'mr_'),  ('mr_', 'ml_'),
     ('rl_', 'rr_'),  ('rr_', 'rl_'),
     ('bl_', 'br_'),  ('br_', 'bl_'),
 ]
@@ -79,6 +80,19 @@ def _mirror_pos(pos: list, mirror: str) -> list:
     return [(-p if mv[i] != 0 else p) for i, p in enumerate(pos)]
 
 
+def _mirror_euler(euler: list, mirror: str) -> list:
+    """Negate roll and yaw when mirroring across Y; roll and pitch across Z; pitch and yaw across X."""
+    base = mirror.strip().lstrip('+-')
+    r, p, y = float(euler[0]), float(euler[1]), float(euler[2])
+    if base == 'y':
+        return [(-r if r != 0 else 0.0), p, (-y if y != 0 else 0.0)]
+    if base == 'x':
+        return [r, (-p if p != 0 else 0.0), (-y if y != 0 else 0.0)]
+    if base == 'z':
+        return [(-r if r != 0 else 0.0), (-p if p != 0 else 0.0), y]
+    return list(euler)
+
+
 def _mirror_node(node: dict, axis: str) -> None:
     """Mirror a node in place, recursing into children."""
     if 'name' in node:
@@ -87,6 +101,8 @@ def _mirror_node(node: dict, axis: str) -> None:
         node['prefix'] = _mirror_name(str(node['prefix']))
     if isinstance(node.get('pos'), list):
         node['pos'] = _mirror_pos(node['pos'], axis)
+    if isinstance(node.get('euler'), list) and len(node['euler']) == 3:
+        node['euler'] = _mirror_euler(node['euler'], axis)
     if isinstance(node.get('joint'), dict):
         j = node['joint']
         if 'name' in j:
@@ -104,6 +120,8 @@ def _mirror_node(node: dict, axis: str) -> None:
             site['name'] = _mirror_name(site['name'])
         if isinstance(site.get('pos'), list):
             site['pos'] = _mirror_pos(site['pos'], axis)
+        if isinstance(site.get('euler'), list) and len(site['euler']) == 3:
+            site['euler'] = _mirror_euler(site['euler'], axis)
     for child in node.get('children', []):
         _mirror_node(child, axis)
 

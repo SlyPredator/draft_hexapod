@@ -34,6 +34,22 @@ def rect_outline(lu: float, lv: float, chamfer_factor: float = 0.15,
     ]
 
 
+def regular_polygon(n: int, r: float, angle_offset: float = 0.0) -> list[list[float]]:
+    """A regular n-gon of radius r as [u, v] vertices, CCW from angle_offset (radians)."""
+    n = int(n)
+    if n < 3:
+        raise ValueError(f'a polygon needs at least 3 vertices, got {n}')
+    r = float(r)
+    if r <= 0:
+        raise ValueError(f'polygon radius must be positive, got {r}')
+    angle_offset = float(angle_offset)
+    verts = []
+    for k in range(n):
+        th = angle_offset + 2.0 * math.pi * k / n
+        verts.append([r * math.cos(th), r * math.sin(th)])
+    return verts
+
+
 def edge_outward_normal(polygon: list, edge: int) -> tuple[float, float]:
     """Outward unit normal (ny, nz) of edge `edge`, judged against the centroid (winding-independent)."""
     n = len(polygon)
