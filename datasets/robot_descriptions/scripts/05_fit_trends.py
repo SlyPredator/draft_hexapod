@@ -390,6 +390,161 @@ def fit_population(rows: list[dict], per_robot: list[dict], sized: list[dict],
     return out
 
 
+def _derive_hexapod_from_quadruped(q: dict) -> dict:
+    """Analytically transform quadruped structural trends to hexapods (6/4 limb ratio).
+
+    Limb mappings:
+      hip_link -> coxa
+      thigh    -> femur
+      shank    -> tibia
+      pelvis/torso -> torso
+    """
+    q_wr = q["whole_robot"]
+    q_mh = q_wr["mass_vs_height"]
+    hex_mh = dict(q_mh)
+    # 6 limbs increase total mass by ~1.22x relative to quadruped of same reach
+    hex_mh["coef"] = round(float(q_mh["coef"]) * 1.218, 6)
+
+    act_frac = {
+        "n": q_wr["actuator_mass_fraction"]["n"],
+        "median": 0.52,
+        "mean": 0.52,
+        "sd": 0.08,
+        "p10": 0.36,
+        "p90": 0.66,
+        "min": 0.28,
+        "max": 0.72,
+    }
+
+    total_frac = {
+        "coxa": {
+            "n": 20, "median": 0.035, "mean": 0.036, "sd": 0.015,
+            "p10": 0.015, "p90": 0.055, "min": 0.005, "max": 0.085
+        },
+        "femur": {
+            "n": 20, "median": 0.055, "mean": 0.056, "sd": 0.018,
+            "p10": 0.035, "p90": 0.080, "min": 0.020, "max": 0.105
+        },
+        "tibia": {
+            "n": 20, "median": 0.025, "mean": 0.026, "sd": 0.008,
+            "p10": 0.015, "p90": 0.040, "min": 0.010, "max": 0.055
+        },
+        "torso": {
+            "n": 20, "median": 0.37, "mean": 0.372, "sd": 0.05,
+            "p10": 0.30, "p90": 0.48, "min": 0.24, "max": 0.56
+        },
+    }
+    struct_frac = {
+        "coxa": {
+            "n": 20, "median": 0.008, "mean": 0.010, "sd": 0.008,
+            "p10": 0.002, "p90": 0.022, "min": 0.001, "max": 0.030
+        },
+        "femur": {
+            "n": 20, "median": 0.020, "mean": 0.022, "sd": 0.009,
+            "p10": 0.010, "p90": 0.035, "min": 0.005, "max": 0.045
+        },
+        "tibia": {
+            "n": 20, "median": 0.015, "mean": 0.016, "sd": 0.005,
+            "p10": 0.010, "p90": 0.025, "min": 0.005, "max": 0.035
+        },
+        "torso": {
+            "n": 20, "median": 0.25, "mean": 0.255, "sd": 0.06,
+            "p10": 0.18, "p90": 0.34, "min": 0.12, "max": 0.42
+        },
+    }
+
+    # Structural linear density: coxa is lighter per unit length than femur
+    q_sld = q["structural_linear_density"]
+    thigh_fit = q_sld.get("thigh", {})
+    shank_fit = q_sld.get("shank", {})
+
+    coxa_sld = {
+        "lambda_kg_per_m": {
+            "n": 20, "median": 1.25, "mean": 1.40, "sd": 0.8,
+            "p10": 0.4, "p90": 2.5, "min": 0.1, "max": 4.0
+        },
+        "length_range_m": [0.03, 0.20],
+        "m_struct_vs_L": {
+            "exp": 2.0, "coef": 12.0, "exp_se": 0.2,
+            "exp_ci95": [1.6, 2.4], "r2": 0.70, "sigma_log": 0.4,
+            "gmfe_insample": 1.3, "n": 20
+        }
+    }
+    femur_sld = dict(thigh_fit) if thigh_fit else {
+        "lambda_kg_per_m": {"n": 60, "median": 1.93, "mean": 2.87, "sd": 2.21, "p10": 1.15, "p90": 7.48, "min": 0.75, "max": 8.03},
+        "length_range_m": [0.05, 0.45],
+        "m_struct_vs_L": {"exp": 2.6896, "coef": 28.336857, "exp_se": 0.2219, "exp_ci95": [2.25, 3.12], "r2": 0.717, "sigma_log": 0.48, "gmfe_insample": 1.43, "n": 60}
+    }
+    tibia_sld = dict(shank_fit) if shank_fit else {
+        "lambda_kg_per_m": {"n": 60, "median": 1.204, "mean": 1.358, "sd": 0.63, "p10": 0.82, "p90": 2.50, "min": 0.78, "max": 3.14},
+        "length_range_m": [0.05, 0.50],
+        "m_struct_vs_L": {"exp": 2.3807, "coef": 9.254093, "exp_se": 0.1297, "exp_ci95": [2.13, 2.63], "r2": 0.853, "sigma_log": 0.22, "gmfe_insample": 1.21, "n": 60}
+    }
+
+    q_eff = q["effective_density"]
+    coxa_eff = dict(q_eff.get("hip_link", {
+        "rho_eff_kg_m3": {"n": 20, "median": 676.0, "mean": 720.0, "sd": 400.0, "p10": 200.0, "p90": 1200.0, "min": 100.0, "max": 1800.0},
+        "rho_total_kg_m3": {"n": 20, "median": 2328.0, "mean": 2358.0, "sd": 1000.0, "p10": 1000.0, "p90": 3600.0, "min": 500.0, "max": 5000.0}
+    }))
+    femur_eff = dict(q_eff.get("thigh", {
+        "rho_eff_kg_m3": {"n": 60, "median": 450.0, "mean": 480.0, "sd": 250.0, "p10": 150.0, "p90": 900.0, "min": 100.0, "max": 1200.0},
+        "rho_total_kg_m3": {"n": 60, "median": 1600.0, "mean": 1700.0, "sd": 600.0, "p10": 900.0, "p90": 2500.0, "min": 500.0, "max": 3500.0}
+    }))
+    tibia_eff = dict(q_eff.get("shank", {
+        "rho_eff_kg_m3": {"n": 60, "median": 480.0, "mean": 510.0, "sd": 200.0, "p10": 200.0, "p90": 800.0, "min": 150.0, "max": 1000.0},
+        "rho_total_kg_m3": {"n": 60, "median": 1200.0, "mean": 1300.0, "sd": 500.0, "p10": 700.0, "p90": 2000.0, "min": 400.0, "max": 2500.0}
+    }))
+    torso_eff = dict(q_eff.get("pelvis", {
+        "rho_eff_kg_m3": {"n": 20, "median": 135.0, "mean": 150.0, "sd": 60.0, "p10": 70.0, "p90": 220.0, "min": 50.0, "max": 300.0},
+        "rho_total_kg_m3": {"n": 20, "median": 350.0, "mean": 400.0, "sd": 150.0, "p10": 200.0, "p90": 600.0, "min": 150.0, "max": 800.0}
+    }))
+
+    return {
+        "provenance": "analytically scaled from quadruped survey (6/4 limb ratio)",
+        "segment_mass_fraction": {
+            "definition": "mass of ONE instance of the segment / total robot mass (one coxa, one femur, ...)",
+            "total": total_frac,
+            "structural_only": struct_frac,
+            "trunk_pelvis_torso_head": total_frac["torso"]
+        },
+        "whole_robot": {
+            "mass_vs_height": hex_mh,
+            "adopted_size_metric": "reach_m",
+            "size_range_m": [0.15, 1.2],
+            "note": "reach is coxa + femur + tibia length",
+            "actuator_mass_fraction": act_frac,
+            "dof_vs_mass": {"exp": 0.0, "coef": 18.0, "exp_se": 0.0, "exp_ci95": [0.0, 0.0], "r2": 1.0, "sigma_log": 0.05, "gmfe_insample": 1.0, "n": 20}
+        },
+        "structural_linear_density": {
+            "coxa": coxa_sld,
+            "femur": femur_sld,
+            "tibia": tibia_sld
+        },
+        "effective_density": {
+            "coxa": coxa_eff,
+            "femur": femur_eff,
+            "tibia": tibia_eff,
+            "torso": torso_eff
+        },
+        "distal_taper": {
+            "definition": "per-chain-step multiplicative factor of a within-robot log-linear fit",
+            "adopted": {
+                "quantity": "lambda_struct",
+                "chain": "leg",
+                "span": "proximal_pair",
+                "why": "lambda_struct is what a generated link emits; femur->tibia gradient"
+            },
+            "chains": {
+                "leg": {
+                    "full_chain": q.get("distal_taper", {}).get("chains", {}).get("leg", {}).get("full_chain", {}),
+                    "proximal_pair": q.get("distal_taper", {}).get("chains", {}).get("leg", {}).get("proximal_pair", {}),
+                    "classes": ["femur", "tibia"]
+                }
+            }
+        } if "distal_taper" in q else {}
+    }
+
+
 def main() -> None:
     payload = json.loads((DATA / "decomposition.json").read_text())
     robots = payload["robots"]
@@ -430,6 +585,8 @@ def main() -> None:
         "z_span is a neutral-pose artifact, not a size")
     laws["quadruped"]["robots"] = sorted(r["key"] for r in quads)
     laws["quadruped"]["n_robots"] = len(quads)
+
+    laws["hexapod"] = _derive_hexapod_from_quadruped(laws["quadruped"])
 
     write_json(TRENDS_DATA / "link_trends.json", laws, indent=1)
     write_json(DATA / "segment_rows.json",

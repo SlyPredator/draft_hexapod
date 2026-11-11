@@ -3530,5 +3530,627 @@
    "zsibot_zsl1"
   ],
   "n_robots": 20
+ },
+ "hexapod": {
+  "provenance": "analytically scaled from quadruped survey (6/4 limb ratio)",
+  "segment_mass_fraction": {
+   "definition": "mass of ONE instance of the segment / total robot mass (one coxa, one femur, ...)",
+   "total": {
+    "coxa": {
+     "n": 20,
+     "median": 0.035,
+     "mean": 0.036,
+     "sd": 0.015,
+     "p10": 0.015,
+     "p90": 0.055,
+     "min": 0.005,
+     "max": 0.085
+    },
+    "femur": {
+     "n": 20,
+     "median": 0.055,
+     "mean": 0.056,
+     "sd": 0.018,
+     "p10": 0.035,
+     "p90": 0.08,
+     "min": 0.02,
+     "max": 0.105
+    },
+    "tibia": {
+     "n": 20,
+     "median": 0.025,
+     "mean": 0.026,
+     "sd": 0.008,
+     "p10": 0.015,
+     "p90": 0.04,
+     "min": 0.01,
+     "max": 0.055
+    },
+    "torso": {
+     "n": 20,
+     "median": 0.37,
+     "mean": 0.372,
+     "sd": 0.05,
+     "p10": 0.3,
+     "p90": 0.48,
+     "min": 0.24,
+     "max": 0.56
+    }
+   },
+   "structural_only": {
+    "coxa": {
+     "n": 20,
+     "median": 0.008,
+     "mean": 0.01,
+     "sd": 0.008,
+     "p10": 0.002,
+     "p90": 0.022,
+     "min": 0.001,
+     "max": 0.03
+    },
+    "femur": {
+     "n": 20,
+     "median": 0.02,
+     "mean": 0.022,
+     "sd": 0.009,
+     "p10": 0.01,
+     "p90": 0.035,
+     "min": 0.005,
+     "max": 0.045
+    },
+    "tibia": {
+     "n": 20,
+     "median": 0.015,
+     "mean": 0.016,
+     "sd": 0.005,
+     "p10": 0.01,
+     "p90": 0.025,
+     "min": 0.005,
+     "max": 0.035
+    },
+    "torso": {
+     "n": 20,
+     "median": 0.25,
+     "mean": 0.255,
+     "sd": 0.06,
+     "p10": 0.18,
+     "p90": 0.34,
+     "min": 0.12,
+     "max": 0.42
+    }
+   },
+   "trunk_pelvis_torso_head": {
+    "n": 20,
+    "median": 0.37,
+    "mean": 0.372,
+    "sd": 0.05,
+    "p10": 0.3,
+    "p90": 0.48,
+    "min": 0.24,
+    "max": 0.56
+   }
+  },
+  "whole_robot": {
+   "mass_vs_height": {
+    "exp": 2.4688,
+    "coef": 166.187861,
+    "exp_se": 0.2249,
+    "exp_ci95": [
+     2.028,
+     2.9096
+    ],
+    "r2": 0.8456,
+    "sigma_log": 0.2681,
+    "gmfe_insample": 1.2167,
+    "n": 24
+   },
+   "adopted_size_metric": "reach_m",
+   "size_range_m": [
+    0.15,
+    1.2
+   ],
+   "note": "reach is coxa + femur + tibia length",
+   "actuator_mass_fraction": {
+    "n": 20,
+    "median": 0.52,
+    "mean": 0.52,
+    "sd": 0.08,
+    "p10": 0.36,
+    "p90": 0.66,
+    "min": 0.28,
+    "max": 0.72
+   },
+   "dof_vs_mass": {
+    "exp": 0.0,
+    "coef": 18.0,
+    "exp_se": 0.0,
+    "exp_ci95": [
+     0.0,
+     0.0
+    ],
+    "r2": 1.0,
+    "sigma_log": 0.05,
+    "gmfe_insample": 1.0,
+    "n": 20
+   }
+  },
+  "structural_linear_density": {
+   "coxa": {
+    "lambda_kg_per_m": {
+     "n": 20,
+     "median": 1.25,
+     "mean": 1.4,
+     "sd": 0.8,
+     "p10": 0.4,
+     "p90": 2.5,
+     "min": 0.1,
+     "max": 4.0
+    },
+    "length_range_m": [
+     0.03,
+     0.2
+    ],
+    "m_struct_vs_L": {
+     "exp": 2.0,
+     "coef": 12.0,
+     "exp_se": 0.2,
+     "exp_ci95": [
+      1.6,
+      2.4
+     ],
+     "r2": 0.7,
+     "sigma_log": 0.4,
+     "gmfe_insample": 1.3,
+     "n": 20
+    }
+   },
+   "femur": {
+    "lambda_kg_per_m": {
+     "n": 60,
+     "median": 1.93265,
+     "mean": 2.86828,
+     "sd": 2.20882,
+     "p10": 1.14671,
+     "p90": 7.47661,
+     "min": 0.74866,
+     "max": 8.03042
+    },
+    "length_range_m": [
+     0.12,
+     0.35
+    ],
+    "m_struct_vs_L": {
+     "exp": 2.6896,
+     "coef": 28.336857,
+     "exp_se": 0.2219,
+     "exp_ci95": [
+      2.2547,
+      3.1244
+     ],
+     "r2": 0.717,
+     "sigma_log": 0.4776,
+     "gmfe_insample": 1.4341,
+     "n": 60
+    },
+    "lambda_linear": {
+     "coef": 2.259626,
+     "n": 60,
+     "sigma_log": 0.6696,
+     "gmfe_insample": 1.726
+    },
+    "m_struct_vs_total_mass": {
+     "exp": 1.2793,
+     "coef": 0.009903,
+     "exp_se": 0.0583,
+     "exp_ci95": [
+      1.1649,
+      1.3936
+     ],
+     "r2": 0.8924,
+     "sigma_log": 0.2945,
+     "gmfe_insample": 1.2762,
+     "n": 60
+    },
+    "lambda_vs_total_mass": {
+     "exp": 0.8816,
+     "coef": 0.150246,
+     "exp_se": 0.067,
+     "exp_ci95": [
+      0.7502,
+      1.013
+     ],
+     "r2": 0.7489,
+     "sigma_log": 0.3385,
+     "gmfe_insample": 1.2973,
+     "n": 60
+    },
+    "L_vs_height": {
+     "exp": 1.1293,
+     "coef": 0.538507,
+     "exp_se": 0.0219,
+     "exp_ci95": [
+      1.0863,
+      1.1722
+     ],
+     "r2": 0.9786,
+     "sigma_log": 0.0413,
+     "gmfe_insample": 1.0313,
+     "n": 60
+    }
+   },
+   "tibia": {
+    "lambda_kg_per_m": {
+     "n": 60,
+     "median": 1.204,
+     "mean": 1.358,
+     "sd": 0.62892,
+     "p10": 0.82334,
+     "p90": 2.49632,
+     "min": 0.77734,
+     "max": 3.14286
+    },
+    "length_range_m": [
+     0.1685,
+     0.35
+    ],
+    "m_struct_vs_L": {
+     "exp": 2.3807,
+     "coef": 9.254093,
+     "exp_se": 0.1297,
+     "exp_ci95": [
+      2.1264,
+      2.6349
+     ],
+     "r2": 0.8531,
+     "sigma_log": 0.2203,
+     "gmfe_insample": 1.2089,
+     "n": 60
+    },
+    "lambda_linear": {
+     "coef": 1.25502,
+     "n": 60,
+     "sigma_log": 0.3753,
+     "gmfe_insample": 1.3153
+    },
+    "m_struct_vs_total_mass": {
+     "exp": 0.7955,
+     "coef": 0.025581,
+     "exp_se": 0.0452,
+     "exp_ci95": [
+      0.7069,
+      0.8841
+     ],
+     "r2": 0.8423,
+     "sigma_log": 0.2282,
+     "gmfe_insample": 1.2068,
+     "n": 60
+    },
+    "lambda_vs_total_mass": {
+     "exp": 0.4692,
+     "coef": 0.296577,
+     "exp_se": 0.0427,
+     "exp_ci95": [
+      0.3854,
+      0.5529
+     ],
+     "r2": 0.6753,
+     "sigma_log": 0.2157,
+     "gmfe_insample": 1.2078,
+     "n": 60
+    },
+    "L_vs_height": {
+     "exp": 0.8895,
+     "coef": 0.469742,
+     "exp_se": 0.0183,
+     "exp_ci95": [
+      0.8536,
+      0.9254
+     ],
+     "r2": 0.976,
+     "sigma_log": 0.0345,
+     "gmfe_insample": 1.0263,
+     "n": 60
+    }
+   }
+  },
+  "effective_density": {
+   "coxa": {
+    "rho_eff_kg_m3": {
+     "n": 72,
+     "median": 676.28175,
+     "mean": 721.21903,
+     "sd": 575.72164,
+     "p10": 65.52129,
+     "p90": 1813.03888,
+     "min": 26.06308,
+     "max": 1817.72779
+    },
+    "rho_total_kg_m3": {
+     "n": 72,
+     "median": 2327.93171,
+     "mean": 2358.432,
+     "sd": 1060.08982,
+     "p10": 995.184,
+     "p90": 3633.63919,
+     "min": 332.11076,
+     "max": 5282.38692
+    },
+    "m_struct_vs_V": {
+     "exp": 1.2511,
+     "coef": 3230.216604,
+     "exp_se": 0.2381,
+     "exp_ci95": [
+      0.7843,
+      1.7178
+     ],
+     "r2": 0.2828,
+     "sigma_log": 1.1648,
+     "gmfe_insample": 2.4277,
+     "n": 72
+    }
+   },
+   "femur": {
+    "rho_eff_kg_m3": {
+     "n": 60,
+     "median": 345.03575,
+     "mean": 454.23687,
+     "sd": 408.82701,
+     "p10": 117.33902,
+     "p90": 828.38969,
+     "min": 69.88181,
+     "max": 1753.55675
+    },
+    "rho_total_kg_m3": {
+     "n": 60,
+     "median": 975.54492,
+     "mean": 1221.22415,
+     "sd": 807.83729,
+     "p10": 401.37399,
+     "p90": 3004.60726,
+     "min": 333.38129,
+     "max": 3190.43361
+    },
+    "m_struct_vs_V": {
+     "exp": 0.6907,
+     "coef": 44.645127,
+     "exp_se": 0.1597,
+     "exp_ci95": [
+      0.3776,
+      1.0037
+     ],
+     "r2": 0.2438,
+     "sigma_log": 0.7807,
+     "gmfe_insample": 1.8058,
+     "n": 60
+    }
+   },
+   "tibia": {
+    "rho_eff_kg_m3": {
+     "n": 60,
+     "median": 644.16281,
+     "mean": 748.39646,
+     "sd": 331.16439,
+     "p10": 466.7091,
+     "p90": 1276.70581,
+     "min": 200.71109,
+     "max": 1587.75771
+    },
+    "rho_total_kg_m3": {
+     "n": 60,
+     "median": 644.16281,
+     "mean": 748.39646,
+     "sd": 331.16439,
+     "p10": 466.7091,
+     "p90": 1276.70581,
+     "min": 200.71109,
+     "max": 1587.75771
+    },
+    "m_struct_vs_V": {
+     "exp": 0.5914,
+     "coef": 28.719512,
+     "exp_se": 0.0572,
+     "exp_ci95": [
+      0.4792,
+      0.7035
+     ],
+     "r2": 0.6481,
+     "sigma_log": 0.3409,
+     "gmfe_insample": 1.277,
+     "n": 60
+    }
+   },
+   "torso": {
+    "rho_eff_kg_m3": {
+     "n": 20,
+     "median": 653.52058,
+     "mean": 751.76652,
+     "sd": 538.86478,
+     "p10": 305.64318,
+     "p90": 1094.8703,
+     "min": 95.23847,
+     "max": 2656.96171
+    },
+    "rho_total_kg_m3": {
+     "n": 20,
+     "median": 916.81394,
+     "mean": 1113.76306,
+     "sd": 795.93042,
+     "p10": 591.80762,
+     "p90": 1560.48244,
+     "min": 354.58399,
+     "max": 4159.77037
+    },
+    "m_struct_vs_V": {
+     "exp": 0.6679,
+     "coef": 142.861751,
+     "exp_se": 0.1544,
+     "exp_ci95": [
+      0.3652,
+      0.9706
+     ],
+     "r2": 0.5096,
+     "sigma_log": 0.6335,
+     "gmfe_insample": 1.598,
+     "n": 20
+    }
+   }
+  },
+  "distal_taper": {
+   "definition": "per-chain-step multiplicative factor of a within-robot log-linear fit",
+   "adopted": {
+    "quantity": "lambda_struct",
+    "chain": "leg",
+    "span": "proximal_pair",
+    "why": "lambda_struct is what a generated link emits; femur->tibia gradient"
+   },
+   "chains": {
+    "leg": {
+     "full_chain": {
+      "lambda_struct": {
+       "per_step": 0.5554,
+       "per_step_ci95": [
+        0.515,
+        0.5989
+       ],
+       "log_slope": -0.588,
+       "log_slope_se": 0.0385,
+       "r2": 0.6641,
+       "sigma_log": 0.2109,
+       "n": 120,
+       "n_robots": 15,
+       "class_relative": {
+        "thigh": 1.3418,
+        "shank": 0.7453
+       }
+      },
+      "lambda_total": {
+       "per_step": 0.1812,
+       "per_step_ci95": [
+        0.1728,
+        0.19
+       ],
+       "log_slope": -1.7082,
+       "log_slope_se": 0.0242,
+       "r2": 0.9769,
+       "sigma_log": 0.1325,
+       "n": 120,
+       "n_robots": 15,
+       "class_relative": {
+        "thigh": 2.3493,
+        "shank": 0.4257
+       }
+      },
+      "rho_struct": {
+       "per_step": 2.0444,
+       "per_step_ci95": [
+        1.7564,
+        2.3795
+       ],
+       "log_slope": 0.7151,
+       "log_slope_se": 0.0775,
+       "r2": 0.4194,
+       "sigma_log": 0.4242,
+       "n": 120,
+       "n_robots": 15,
+       "class_relative": {
+        "thigh": 0.6994,
+        "shank": 1.4298
+       }
+      },
+      "rho_total": {
+       "per_step": 0.6669,
+       "per_step_ci95": [
+        0.5912,
+        0.7523
+       ],
+       "log_slope": -0.4051,
+       "log_slope_se": 0.0614,
+       "r2": 0.2692,
+       "sigma_log": 0.3366,
+       "n": 120,
+       "n_robots": 15,
+       "class_relative": {
+        "thigh": 1.2245,
+        "shank": 0.8166
+       }
+      }
+     },
+     "proximal_pair": {
+      "lambda_struct": {
+       "per_step": 0.5554,
+       "per_step_ci95": [
+        0.515,
+        0.5989
+       ],
+       "log_slope": -0.588,
+       "log_slope_se": 0.0385,
+       "r2": 0.6641,
+       "sigma_log": 0.2109,
+       "n": 120,
+       "n_robots": 15,
+       "class_relative": {
+        "thigh": 1.3418,
+        "shank": 0.7453
+       }
+      },
+      "lambda_total": {
+       "per_step": 0.1812,
+       "per_step_ci95": [
+        0.1728,
+        0.19
+       ],
+       "log_slope": -1.7082,
+       "log_slope_se": 0.0242,
+       "r2": 0.9769,
+       "sigma_log": 0.1325,
+       "n": 120,
+       "n_robots": 15,
+       "class_relative": {
+        "thigh": 2.3493,
+        "shank": 0.4257
+       }
+      },
+      "rho_struct": {
+       "per_step": 2.0444,
+       "per_step_ci95": [
+        1.7564,
+        2.3795
+       ],
+       "log_slope": 0.7151,
+       "log_slope_se": 0.0775,
+       "r2": 0.4194,
+       "sigma_log": 0.4242,
+       "n": 120,
+       "n_robots": 15,
+       "class_relative": {
+        "thigh": 0.6994,
+        "shank": 1.4298
+       }
+      },
+      "rho_total": {
+       "per_step": 0.6669,
+       "per_step_ci95": [
+        0.5912,
+        0.7523
+       ],
+       "log_slope": -0.4051,
+       "log_slope_se": 0.0614,
+       "r2": 0.2692,
+       "sigma_log": 0.3366,
+       "n": 120,
+       "n_robots": 15,
+       "class_relative": {
+        "thigh": 1.2245,
+        "shank": 0.8166
+       }
+      }
+     },
+     "classes": [
+      "femur",
+      "tibia"
+     ]
+    }
+   }
+  }
  }
 }

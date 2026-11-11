@@ -374,7 +374,7 @@ class LinkTrends:
     """
 
     #: Legal values of `mass_composition_reference`.
-    POPULATIONS = ("humanoid", "quadruped")
+    POPULATIONS = ("humanoid", "quadruped", "hexapod")
 
     def __init__(self, laws_path: Path = LINK_TRENDS_JSON,
                  population: str = "humanoid"):
@@ -402,7 +402,7 @@ class LinkTrends:
         # Limb classes for the link-density band (hands/feet excluded).
         eff = self._laws["effective_density"]
         self._limb_rho = {k: eff[k]["rho_eff_kg_m3"]
-                          for k in ("thigh", "shank", "forearm") if k in eff}
+                          for k in ("thigh", "shank", "forearm", "coxa", "femur", "tibia") if k in eff}
 
     def distal_taper(self, chain: str = "leg") -> dict | None:
         """Per-step ratio of structural λ (kg/m) along a limb chain, or None.
@@ -454,7 +454,7 @@ class LinkTrends:
     _DENSITY_LAW_EXCLUDES = ("torso", "pelvis")
 
     #: Measured class used as the trunk, per population (a quadruped body is `pelvis`).
-    TRUNK_CLASS = {"humanoid": "torso", "quadruped": "pelvis"}
+    TRUNK_CLASS = {"humanoid": "torso", "quadruped": "pelvis", "hexapod": "torso"}
 
     def trunk_density(self) -> Optional[dict]:
         """Measured trunk density for ``torso_rho`` (battery and compute included).
@@ -547,7 +547,8 @@ class LinkTrends:
 
         Error above the measured max, warning above p90.
         """
-        stats = self._laws["effective_density"]["pelvis"]["rho_total_kg_m3"]
+        cls = self.TRUNK_CLASS.get(self.population, "pelvis")
+        stats = (self._laws["effective_density"].get(cls) or self._laws["effective_density"].get("pelvis") or {})["rho_total_kg_m3"]
         if rho > stats["max"]:
             return ([f"trunk density {rho:.0f} kg/m³ exceeds the densest measured "
                      f"robot trunk segment ({stats['max']:.0f} kg/m³): the battery "
@@ -648,7 +649,7 @@ class LinkTrends:
         return out
 
     def warnings(self, audit: dict) -> list[str]:
-        pop = {"humanoid": "humanoids", "quadruped": "quadrupeds"}.get(
+        pop = {"humanoid": "humanoids", "quadruped": "quadrupeds", "hexapod": "hexapods"}.get(
             audit.get("reference_population"), "robots")
         msgs = []
         for c in audit.get("checks", []):
