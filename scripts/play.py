@@ -50,6 +50,10 @@ def _parse_args() -> argparse.Namespace:
         help="Per-run YAML. Defaults to <task_path>/config.yaml.",
     )
     parser.add_argument(
+        "--robot", type=str, default=None,
+        help="Robot preset name (e.g. beetle, tarantula, strider, cheetah) or path to robot XML.",
+    )
+    parser.add_argument(
         "--checkpoint", type=str, default=None,
         help="Path to .pt checkpoint (auto-selects latest if omitted).",
     )
@@ -57,7 +61,33 @@ def _parse_args() -> argparse.Namespace:
         "--viewer", type=str, default=None, choices=["viser", "native"],
         help="Override viewer choice from config.",
     )
+    parser.add_argument(
+        "--flat", action="store_true", default=False,
+        help="Force pure flat plane ground in playback.",
+    )
+    parser.add_argument(
+        "--rough", action="store_true", default=False,
+        help="Force rough terrain generator in playback.",
+    )
     return parser.parse_args()
+
+
+def _resolve_robot_flag(robot: str, task_name: str) -> str:
+    p = Path(robot)
+    if p.exists():
+        return str(p)
+    gen_dir = Path("generated") / robot
+    if gen_dir.is_dir():
+        for cand in [
+            gen_dir / f"{task_name.split('_')[0]}.xml",
+            gen_dir / "hexapod.xml",
+            gen_dir / "quadruped.xml",
+        ]:
+            if cand.exists():
+                return str(cand)
+    raise FileNotFoundError(
+        f"Could not resolve --robot '{robot}'. Expected existing path or directory under generated/."
+    )
 
 
 def main() -> None:
@@ -80,6 +110,8 @@ def main() -> None:
     runner_cfg = task.make_runner_cfg()
     runner_cfg.apply_overrides(run_cfg["runner_overrides"])
     runner_cfg.env_kwargs = {**runner_cfg.env_kwargs, **run_cfg["env_kwargs"]}
+    if args.robot is not None:
+        runner_cfg.env_kwargs["robot_xml"] = _resolve_robot_flag(args.robot, task_name)
     require_robot_xml(runner_cfg.env_kwargs)
     runner_cfg.reward_overrides = {
         **runner_cfg.reward_overrides, **run_cfg["reward_overrides"]
@@ -114,6 +146,17 @@ def main() -> None:
         for name, weight in runner_cfg.reward_overrides.items():
             if name in env_cfg.rewards:
                 env_cfg.rewards[name].weight = float(weight)
+
+    # ── Match ground to what the policy was actually trained on ──────────────
+    # For flat base tasks (not the rough terrain task), show the clean flat plane.
+    # For terrain tasks (hexapod_terrain, quadruped_terrain), keep the rough generator.
+    if (args.flat or "terrain" not in task_name) and not args.rough:
+        if env_cfg.scene.terrain is not None:
+            env_cfg.scene.terrain.terrain_type = "plane"
+            env_cfg.scene.terrain.terrain_generator = None
+            print("  Ground     : pure flat plane (matching flat policy)")
+    else:
+        print("  Ground     : rough terrain generator (matching terrain policy)")
 
     # ── Device ──────────────────────────────────────────────────────────────
     configure_torch_backends()

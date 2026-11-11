@@ -45,6 +45,24 @@ from draft.tasks import get_task, list_tasks
 from draft.tasks.config_loader import load_run_config, require_robot_xml
 
 
+def _resolve_robot_flag(robot: str, task_name: str) -> str:
+    p = Path(robot)
+    if p.exists():
+        return str(p)
+    gen_dir = Path("generated") / robot
+    if gen_dir.is_dir():
+        for cand in [
+            gen_dir / f"{task_name.split('_')[0]}.xml",
+            gen_dir / "hexapod.xml",
+            gen_dir / "quadruped.xml",
+        ]:
+            if cand.exists():
+                return str(cand)
+    raise FileNotFoundError(
+        f"Could not resolve --robot '{robot}'. Expected existing path or directory under generated/."
+    )
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Train a GPU-accelerated RL policy from a registered task."
@@ -56,6 +74,18 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--config", type=str, default=None,
         help="Per-run YAML. Defaults to <task_path>/config.yaml.",
+    )
+    parser.add_argument(
+        "--robot", type=str, default=None,
+        help="Robot preset name (e.g. beetle, tarantula, strider, cheetah) or path to robot XML.",
+    )
+    parser.add_argument(
+        "--run-name", type=str, default=None,
+        help="Name of this training run (overrides config run_name).",
+    )
+    parser.add_argument(
+        "--num-envs", type=int, default=None,
+        help="Number of parallel environments (overrides runner cfg n_envs).",
     )
     parser.add_argument(
         "--warmstart", type=str, default=None,
@@ -104,9 +134,15 @@ def main() -> None:
     # ── Build runner cfg with overrides ──────────────────────────────────────
     runner_cfg = task.make_runner_cfg()
     runner_cfg.apply_overrides(run_cfg["runner_overrides"])
+    if args.run_name is not None:
+        runner_cfg.run_name = args.run_name
+    if args.num_envs is not None:
+        runner_cfg.n_envs = args.num_envs
     if args.warmstart is not None:
         runner_cfg.warmstart_checkpoint = args.warmstart
     runner_cfg.env_kwargs = {**runner_cfg.env_kwargs, **run_cfg["env_kwargs"]}
+    if args.robot is not None:
+        runner_cfg.env_kwargs["robot_xml"] = _resolve_robot_flag(args.robot, task_name)
     require_robot_xml(runner_cfg.env_kwargs)
     runner_cfg.reward_overrides = {
         **runner_cfg.reward_overrides, **run_cfg["reward_overrides"]
