@@ -1,0 +1,17 @@
+# mesh.yaml — hexapod body (regular hexagonal carapace with flared upper deck)
+name: torso
+axis: z
+density_param: torso_rho
+chamfer: 0.15
+
+layers:
+  - {pos: "${-body_height / 2}",
+     polygon: "${regular_polygon(6, body_radius)}",
+     inset: "${body_bevel}"}
+  - {pos: "${-body_height / 2 + body_bevel}",
+     polygon: "${regular_polygon(6, body_radius)}"}
+  - {pos: "${body_height / 2 - body_bevel}",
+     polygon: "${regular_polygon(6, body_radius * 1.08)}"}
+  - {pos: "${body_height / 2}",
+     polygon: "${regular_polygon(6, body_radius * 1.08)}",
+     inset: "${body_bevel}"}

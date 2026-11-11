@@ -1,0 +1,19 @@
+# presets/beetle.yaml — heavy high-payload MidGear hexapod
+body_radius: 0.22
+body_height: 0.12
+coxa_length: 0.090
+femur_length: 0.160
+tibia_length: 0.250
+
+S_motor_effort: 28.0
+S_motor_velocity: 24.0
+S_motor_gear: 15.0
+
+M_motor_effort: 55.0
+M_motor_velocity: 18.0
+M_motor_gear: 18.0
+
+torso_color: 0.15 0.18 0.15 1.0
+coxa_color: 0.20 0.20 0.20 1.0
+femur_color: 0.25 0.30 0.25 1.0
+tibia_color: 0.18 0.18 0.18 1.0

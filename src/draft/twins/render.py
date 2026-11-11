@@ -48,6 +48,7 @@ MARKER_SIZE = 0.02
 STANDING_POSE = {
     "quadruped": {"hip_roll": 0.0, "hip_pitch": 0.8, "knee": -1.6},
     "humanoid": {},
+    "hexapod": {"coxa_yaw": 0.0, "femur_pitch": 0.35, "tibia_pitch": -1.45},
 }
 
 #: Extra pose for the generated half only: bends the twin's elbows to match the
@@ -55,6 +56,7 @@ STANDING_POSE = {
 TWIN_POSE = {
     "humanoid": {"elbow": -np.pi / 2},
     "quadruped": {},
+    "hexapod": {},
 }
 
 #: Vendor meshes misplaced by their MJCF conversion (B2's depth-camera shells);
@@ -251,7 +253,7 @@ class PairRenderer:
     """Renders one (shipped, twin) pair into a single labelled image."""
 
     #: Viewport (w, h) per body plan, matched to the pair's aspect.
-    VIEWPORT = {"humanoid": (880, 1120), "quadruped": (1680, 720)}
+    VIEWPORT = {"humanoid": (880, 1120), "quadruped": (1680, 720), "hexapod": (1440, 1080)}
 
     def __init__(self, width: int = 900, height: int = 1180,
                  azimuth: float = 128.0, elevation: float = -12.0):

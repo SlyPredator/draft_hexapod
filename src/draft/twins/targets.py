@@ -85,6 +85,9 @@ GENERATED_HUMANOID_ROLES = [
 GENERATED_QUADRUPED_ROLES = [
     (r"hip_roll", "hip_roll"), (r"hip_pitch", "hip_pitch"), (r"knee", "knee"),
 ]
+GENERATED_HEXAPOD_ROLES = [
+    (r"coxa_yaw", "coxa_yaw"), (r"femur_pitch", "femur_pitch"), (r"tibia_pitch", "tibia_pitch"),
+]
 
 
 REGISTRY: list[Target] = [

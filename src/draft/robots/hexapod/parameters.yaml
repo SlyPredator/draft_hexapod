@@ -1,0 +1,74 @@
+# parameters.yaml — hexapod parameter table
+
+# Motor size classes
+M_motor_effort: 25.0
+M_motor_velocity: 30.0
+M_motor_gear: 8.0
+M_motor_friction: 0.08
+M_motor_damping: 0.008
+
+S_motor_effort: 15.0
+S_motor_velocity: 35.0
+S_motor_gear: 8.0
+S_motor_friction: 0.05
+S_motor_damping: 0.005
+
+# Motor class assignments per joint
+coxa_yaw_mot: S
+femur_pitch_mot: M
+tibia_pitch_mot: M
+
+# Structural densities (derived by trends for hexapod population; keys declare segments)
+coxa_rho: 676.3
+femur_rho: 450.0
+tibia_rho: 644.2
+torso_rho: 653.5
+motor_rho: 2700.0
+
+# Joint ranges (rad)
+coxa_yaw_range: [-0.75, 0.75]
+femur_pitch_range: [-1.2, 1.2]
+tibia_pitch_range: [-2.2, -0.2]
+
+# Chassis & leg dimensions (m)
+body_radius: 0.19
+body_height: 0.10
+body_bevel: 0.015
+
+coxa_length: 0.085
+femur_length: 0.150
+tibia_length: 0.240
+foot_sphere_r: 0.018
+
+# Radial leg mounting angles (degrees and radians)
+front_leg_angle_deg: 50.0
+front_leg_angle_rad: "${front_leg_angle_deg * pi / 180.0}"
+mid_leg_angle_deg: 90.0
+mid_leg_angle_rad: "${mid_leg_angle_deg * pi / 180.0}"
+rear_leg_angle_deg: 130.0
+rear_leg_angle_rad: "${rear_leg_angle_deg * pi / 180.0}"
+
+# Sizing and feasibility audit
+mass_composition_reference: hexapod
+size_metric_expr: "${coxa_length + femur_length + tibia_length}"
+allow_hypothetical: false
+
+structure_overlap_allowed:
+  - coxa_yaw
+  - fl_coxa_mount_link
+  - fr_coxa_mount_link
+  - ml_coxa_mount_link
+  - mr_coxa_mount_link
+  - rl_coxa_mount_link
+  - rr_coxa_mount_link
+
+# Visual colors
+torso_color: 0.92 0.42 0.12 1.0
+deck_color: 0.22 0.24 0.28 1.0
+coxa_color: 0.35 0.30 0.25 1.0
+femur_color: 0.85 0.40 0.12 1.0
+tibia_color: 0.25 0.25 0.28 1.0
+foot_color: 0.15 0.15 0.15 1.0
+motor_color: 0.18 0.18 0.20 1.0
+mot_detail_color: 0.85 0.45 0.10 1.0
+camera_bezel_color: 0.15 0.75 0.85 1.0

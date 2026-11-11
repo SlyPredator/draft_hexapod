@@ -1,0 +1,19 @@
+# presets/strider.yaml — long-legged fast hexapod
+body_radius: 0.16
+body_height: 0.08
+coxa_length: 0.085
+femur_length: 0.190
+tibia_length: 0.320
+
+S_motor_effort: 16.0
+S_motor_velocity: 42.0
+S_motor_gear: 7.0
+
+M_motor_effort: 32.0
+M_motor_velocity: 38.0
+M_motor_gear: 8.0
+
+torso_color: 0.20 0.45 0.75 1.0
+coxa_color: 0.22 0.24 0.28 1.0
+femur_color: 0.25 0.50 0.80 1.0
+tibia_color: 0.15 0.15 0.18 1.0

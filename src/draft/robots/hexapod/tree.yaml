@@ -1,0 +1,299 @@
+# tree.yaml — 18-DOF radially symmetric sprawled hexapod
+
+name: torso_link
+type: root
+color: ${torso_color}
+pos: [0, 0, "${max(body_height / 2 + 0.02, tibia_length * sin(1.45 - 0.35) - femur_length * sin(0.35) + foot_sphere_r)}"]
+sites:
+  - name: imu
+    pos: [0, 0, 0]
+sensors:
+  - type: gyro
+    name: imu_ang_vel
+    site: imu
+  - type: velocimeter
+    name: imu_lin_vel
+    site: imu
+  - type: accelerometer
+    name: imu_lin_acc
+    site: imu
+  - type: subtreeangmom
+    name: root_angmom
+    body: torso_link
+
+children:
+
+  # ── Decorative front camera bezel & top deck rail ────────────────
+  - name: camera_bezel
+    type: geom
+    pos: ["${body_radius * 0.98}", 0, "${body_height * 0.15}"]
+    geometry:
+      shape: cylinder
+      r: 0.016
+      l: 0.012
+      axis: x
+      decorative: true
+      color: ${camera_bezel_color}
+
+  - name: deck_rail
+    type: geom
+    pos: [0, 0, "${body_height / 2 + 0.004}"]
+    geometry:
+      shape: box
+      lx: "${body_radius * 0.65}"
+      ly: "${body_radius * 0.65}"
+      lz: 0.008
+      decorative: true
+      color: ${deck_color}
+
+  # ══════════════════════════════════════════════════════════════════
+  # FRONT-LEFT (FL) LEG — mounted at +front_leg_angle_rad
+  # ══════════════════════════════════════════════════════════════════
+  - name: fl_coxa_mount
+    type: basic
+    pos: ["${body_radius * cos(front_leg_angle_rad)}", "${body_radius * sin(front_leg_angle_rad)}", 0]
+    euler: [0, 0, "${front_leg_angle_rad}"]
+    joint: null
+    geometry:
+      link_l: 0
+      motor_axis: z
+      motor_class: ${coxa_yaw_mot}
+      motor_for: coxa_yaw
+      link_color: ${coxa_color}
+    children:
+
+      - name: fl_coxa_link
+        type: basic
+        pos: [0, 0, 0]
+        joint:
+          name: fl_coxa_yaw
+          axis: z
+          range: ${coxa_yaw_range}
+          motor_class: ${coxa_yaw_mot}
+        geometry:
+          link_axis: x
+          link_l: ${coxa_length}
+          link_mass_class: coxa
+          link_rho: ${coxa_rho}
+          link_color: ${coxa_color}
+          motor_axis: y
+          motor_class: ${femur_pitch_mot}
+          motor_for: femur_pitch
+        children:
+
+          - name: fl_femur_link
+            type: basic
+            pos: ["${coxa_length}", 0, 0]
+            joint:
+              name: fl_femur_pitch
+              axis: -y
+              range: ${femur_pitch_range}
+              motor_class: ${femur_pitch_mot}
+            geometry:
+              link_axis: x
+              link_l: ${femur_length}
+              link_mass_class: femur
+              link_rho: ${femur_rho}
+              link_color: ${femur_color}
+              taper: leg
+              taper_depth: 1
+              motor_axis: y
+              motor_class: ${tibia_pitch_mot}
+              motor_for: tibia_pitch
+            children:
+
+              - name: fl_tibia_link
+                type: sphere
+                pos: ["${femur_length}", 0, 0]
+                joint:
+                  name: fl_tibia_pitch
+                  axis: -y
+                  range: ${tibia_pitch_range}
+                  motor_class: ${tibia_pitch_mot}
+                geometry:
+                  link_axis: x
+                  link_l: ${tibia_length}
+                  link_mass_class: tibia
+                  link_rho: ${tibia_rho}
+                  link_color: ${tibia_color}
+                  taper: leg
+                  taper_depth: 2
+                  sphere_dir: 1
+                  sphere_r: ${foot_sphere_r}
+                  sphere_color: ${foot_color}
+                sites:
+                  - name: fl_foot
+                    pos: ["${tibia_length}", 0, 0]
+
+  # ══════════════════════════════════════════════════════════════════
+  # MID-LEFT (ML) LEG — mounted at +mid_leg_angle_rad (90 deg lateral)
+  # ══════════════════════════════════════════════════════════════════
+  - name: ml_coxa_mount
+    type: basic
+    pos: ["${body_radius * cos(mid_leg_angle_rad)}", "${body_radius * sin(mid_leg_angle_rad)}", 0]
+    euler: [0, 0, "${mid_leg_angle_rad}"]
+    joint: null
+    geometry:
+      link_l: 0
+      motor_axis: z
+      motor_class: ${coxa_yaw_mot}
+      motor_for: coxa_yaw
+      link_color: ${coxa_color}
+    children:
+
+      - name: ml_coxa_link
+        type: basic
+        pos: [0, 0, 0]
+        joint:
+          name: ml_coxa_yaw
+          axis: z
+          range: ${coxa_yaw_range}
+          motor_class: ${coxa_yaw_mot}
+        geometry:
+          link_axis: x
+          link_l: ${coxa_length}
+          link_mass_class: coxa
+          link_rho: ${coxa_rho}
+          link_color: ${coxa_color}
+          motor_axis: y
+          motor_class: ${femur_pitch_mot}
+          motor_for: femur_pitch
+        children:
+
+          - name: ml_femur_link
+            type: basic
+            pos: ["${coxa_length}", 0, 0]
+            joint:
+              name: ml_femur_pitch
+              axis: -y
+              range: ${femur_pitch_range}
+              motor_class: ${femur_pitch_mot}
+            geometry:
+              link_axis: x
+              link_l: ${femur_length}
+              link_mass_class: femur
+              link_rho: ${femur_rho}
+              link_color: ${femur_color}
+              taper: leg
+              taper_depth: 1
+              motor_axis: y
+              motor_class: ${tibia_pitch_mot}
+              motor_for: tibia_pitch
+            children:
+
+              - name: ml_tibia_link
+                type: sphere
+                pos: ["${femur_length}", 0, 0]
+                joint:
+                  name: ml_tibia_pitch
+                  axis: -y
+                  range: ${tibia_pitch_range}
+                  motor_class: ${tibia_pitch_mot}
+                geometry:
+                  link_axis: x
+                  link_l: ${tibia_length}
+                  link_mass_class: tibia
+                  link_rho: ${tibia_rho}
+                  link_color: ${tibia_color}
+                  taper: leg
+                  taper_depth: 2
+                  sphere_dir: 1
+                  sphere_r: ${foot_sphere_r}
+                  sphere_color: ${foot_color}
+                sites:
+                  - name: ml_foot
+                    pos: ["${tibia_length}", 0, 0]
+
+  # ══════════════════════════════════════════════════════════════════
+  # REAR-LEFT (RL) LEG — mounted at +rear_leg_angle_rad
+  # ══════════════════════════════════════════════════════════════════
+  - name: rl_coxa_mount
+    type: basic
+    pos: ["${body_radius * cos(rear_leg_angle_rad)}", "${body_radius * sin(rear_leg_angle_rad)}", 0]
+    euler: [0, 0, "${rear_leg_angle_rad}"]
+    joint: null
+    geometry:
+      link_l: 0
+      motor_axis: z
+      motor_class: ${coxa_yaw_mot}
+      motor_for: coxa_yaw
+      link_color: ${coxa_color}
+    children:
+
+      - name: rl_coxa_link
+        type: basic
+        pos: [0, 0, 0]
+        joint:
+          name: rl_coxa_yaw
+          axis: z
+          range: ${coxa_yaw_range}
+          motor_class: ${coxa_yaw_mot}
+        geometry:
+          link_axis: x
+          link_l: ${coxa_length}
+          link_mass_class: coxa
+          link_rho: ${coxa_rho}
+          link_color: ${coxa_color}
+          motor_axis: y
+          motor_class: ${femur_pitch_mot}
+          motor_for: femur_pitch
+        children:
+
+          - name: rl_femur_link
+            type: basic
+            pos: ["${coxa_length}", 0, 0]
+            joint:
+              name: rl_femur_pitch
+              axis: -y
+              range: ${femur_pitch_range}
+              motor_class: ${femur_pitch_mot}
+            geometry:
+              link_axis: x
+              link_l: ${femur_length}
+              link_mass_class: femur
+              link_rho: ${femur_rho}
+              link_color: ${femur_color}
+              taper: leg
+              taper_depth: 1
+              motor_axis: y
+              motor_class: ${tibia_pitch_mot}
+              motor_for: tibia_pitch
+            children:
+
+              - name: rl_tibia_link
+                type: sphere
+                pos: ["${femur_length}", 0, 0]
+                joint:
+                  name: rl_tibia_pitch
+                  axis: -y
+                  range: ${tibia_pitch_range}
+                  motor_class: ${tibia_pitch_mot}
+                geometry:
+                  link_axis: x
+                  link_l: ${tibia_length}
+                  link_mass_class: tibia
+                  link_rho: ${tibia_rho}
+                  link_color: ${tibia_color}
+                  taper: leg
+                  taper_depth: 2
+                  sphere_dir: 1
+                  sphere_r: ${foot_sphere_r}
+                  sphere_color: ${foot_color}
+                sites:
+                  - name: rl_foot
+                    pos: ["${tibia_length}", 0, 0]
+
+  # ══════════════════════════════════════════════════════════════════
+  # RIGHT LEGS — generated via mirror_of across mirror_axis: y
+  # ══════════════════════════════════════════════════════════════════
+  - name: fr_coxa_mount
+    mirror_of: fl_coxa_mount
+    mirror_axis: y
+
+  - name: mr_coxa_mount
+    mirror_of: ml_coxa_mount
+    mirror_axis: y
+
+  - name: rr_coxa_mount
+    mirror_of: rl_coxa_mount
+    mirror_axis: y

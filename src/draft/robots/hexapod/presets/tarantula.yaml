@@ -1,0 +1,19 @@
+# presets/tarantula.yaml — medium agile QDD hexapod
+body_radius: 0.18
+body_height: 0.09
+coxa_length: 0.085
+femur_length: 0.140
+tibia_length: 0.220
+
+S_motor_effort: 18.0
+S_motor_velocity: 38.0
+S_motor_gear: 7.75
+
+M_motor_effort: 30.0
+M_motor_velocity: 32.0
+M_motor_gear: 9.0
+
+torso_color: 0.88 0.38 0.10 1.0
+coxa_color: 0.30 0.25 0.20 1.0
+femur_color: 0.80 0.35 0.10 1.0
+tibia_color: 0.20 0.20 0.22 1.0
