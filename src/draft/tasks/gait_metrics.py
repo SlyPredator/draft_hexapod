@@ -26,7 +26,19 @@ CANONICAL_GAITS: dict[str, tuple[float, float, float]] = {
     "walk*": (0.5,  0.75, 0.25),  # its mirror image
 }
 
+#: Canonical 6-foot footfall patterns: phase of each foot relative to left-front (fl), in
+#: cycles, for non-reference feet (fr, ml, mr, rl, rr).
+CANONICAL_HEXAPOD_GAITS: dict[str, tuple[float, float, float, float, float]] = {
+    #        (fr,   ml,         mr,         rl,         rr)   relative to fl
+    "tripod":  (0.5,  0.5,        0.0,        0.0,        0.5),
+    "ripple":  (0.5,  1.0 / 3.0,  5.0 / 6.0,  2.0 / 3.0,  1.0 / 6.0),
+    "ripple*": (0.5,  5.0 / 6.0,  1.0 / 3.0,  1.0 / 6.0,  2.0 / 3.0),
+    "wave":    (1.0 / 6.0, 2.0 / 6.0, 4.0 / 6.0, 3.0 / 6.0, 5.0 / 6.0),
+    "wave*":   (5.0 / 6.0, 4.0 / 6.0, 2.0 / 6.0, 3.0 / 6.0, 1.0 / 6.0),
+}
+
 DEFAULT_FEET = ("fl", "fr", "rl", "rr")
+HEXAPOD_FEET = ("fl", "fr", "ml", "mr", "rl", "rr")
 
 
 # ── circular statistics ──────────────────────────────────────────────────────
@@ -141,7 +153,21 @@ def _per_env(contact: np.ndarray, dt: float,
         # How reliably the non-reference feet hit their phase slot.
         out["phase_lock"][b] = float(np.nanmean(R[1:])) if F > 1 else nan
 
-        if F >= 4 and np.isfinite(phi[1:4]).all():
+        if F >= 6 and np.isfinite(phi[1:6]).all():
+            # Mirror symmetry across the 3 bilateral pairs:
+            # front (fr - fl), mid (mr - ml), rear (rr - rl)
+            front = phi[1] - phi[0]
+            mid = phi[3] - phi[2]
+            rear = phi[5] - phi[4]
+            d_fm = _circ_dist(front, mid)
+            d_mr = _circ_dist(mid, rear)
+            d_fr = _circ_dist(front, rear)
+            out["lr_phase_asymmetry"][b] = float((d_fm + d_mr + d_fr) / 3.0)
+
+            name, dist = classify_hexapod_gait(tuple(phi[1:6]))
+            out["gait_class"][b] = name
+            out["gait_class_dist"][b] = dist
+        elif F >= 4 and np.isfinite(phi[1:4]).all():
             # Mirror symmetry for any gait: the front pair's L->R offset must
             # equal the rear pair's.
             front = phi[1] - phi[0]          # fr - fl
@@ -169,10 +195,24 @@ def classify_gait(phases: tuple[float, float, float]) -> tuple[str, float]:
     return best, best_d
 
 
+def classify_hexapod_gait(phases: tuple[float, float, float, float, float]) -> tuple[str, float]:
+    """Nearest canonical 6-foot footfall pattern, and the phase distance to it.
+
+    Distance is the RMS circular error over the non-reference feet (fr, ml, mr, rl, rr), in cycles.
+    """
+    best, best_d = "", float("inf")
+    for name, ref in CANONICAL_HEXAPOD_GAITS.items():
+        d = float(np.sqrt(np.mean([_circ_dist(p, r) ** 2
+                                   for p, r in zip(phases, ref)])))
+        if d < best_d:
+            best, best_d = name, d
+    return best, best_d
+
+
 # ── public entry points ──────────────────────────────────────────────────────
 
 def contact_gait_metrics(contact, dt: float,
-                         feet: tuple[str, ...] = DEFAULT_FEET) -> dict:
+                         feet: tuple[str, ...] | None = None) -> dict:
     """Gait discreteness, regularity and timing symmetry from foot contacts.
 
     ``contact`` is ``[T, B, F]``, boolean or a count (>0 means touching), as a
@@ -185,6 +225,9 @@ def contact_gait_metrics(contact, dt: float,
         return {}
     c = c > 0
     st = _per_env(c, dt)
+
+    if feet is None:
+        feet = HEXAPOD_FEET if c.shape[2] == 6 else DEFAULT_FEET
 
     def avg(k):
         v = st[k]
@@ -225,7 +268,7 @@ def contact_gait_metrics(contact, dt: float,
 
 
 def joint_symmetry_metrics(joint_pos, joint_names: list[str],
-                           pairs=(("fl", "fr"), ("rl", "rr"))) -> dict:
+                           pairs: tuple[tuple[str, str], ...] | None = None) -> dict:
     """Left-right symmetry of how FAR the legs swing, from joint positions.
 
     ``joint_pos`` is ``[T, B, J]``; ``fl_x`` pairs with ``fr_x`` (etc.). Returns the
@@ -235,6 +278,13 @@ def joint_symmetry_metrics(joint_pos, joint_names: list[str],
                    else joint_pos)
     if q.ndim != 3 or q.shape[0] < 3:
         return {}
+
+    if pairs is None:
+        if any(name.startswith("ml_") for name in joint_names):
+            pairs = (("fl", "fr"), ("ml", "mr"), ("rl", "rr"))
+        else:
+            pairs = (("fl", "fr"), ("rl", "rr"))
+
     # 5th-95th percentile swing, robust to a single stumble.
     exc = np.percentile(q, 95, axis=0) - np.percentile(q, 5, axis=0)   # [B, J]
     by_name = {n: i for i, n in enumerate(joint_names)}

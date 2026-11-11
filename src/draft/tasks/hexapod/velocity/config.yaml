@@ -1,0 +1,7 @@
+# Top-speed challenge. Warm-start from the flat base policy for this design.
+task: hexapod_velocity
+run_name: hexapod_velocity
+max_iterations: 1800
+save_interval: 250
+env_kwargs:
+  robot_xml: generated/tarantula/hexapod.xml

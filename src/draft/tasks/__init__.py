@@ -32,8 +32,8 @@ class TaskEntry:
     def make_env_cfg(self, **kwargs):
         return self.load().make_env_cfg(**kwargs)
 
-    def make_runner_cfg(self):
-        return self.load().make_runner_cfg()
+    def make_runner_cfg(self, **kwargs):
+        return self.load().make_runner_cfg(**kwargs)
 
     def env_class(self):
         """The task's ``ENV_CLASS`` if it defines one, else ``ManagerBasedRlEnv``."""

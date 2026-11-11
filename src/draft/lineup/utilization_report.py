@@ -27,8 +27,11 @@ ROBOTS = ("cheetah", "bear", "giraffe")
 _SETTLE_FRAC = 0.2
 
 
+JOINT_CLASSES = ("hip_roll", "hip_pitch", "knee", "coxa_yaw", "femur_pitch", "tibia_pitch")
+
+
 def _joint_class(name: str) -> str:
-    for k in ("hip_roll", "hip_pitch", "knee"):
+    for k in JOINT_CLASSES:
         if k in name:
             return k
     return "other"
@@ -68,7 +71,7 @@ _SAT = 0.90
 def _hot(d):
     """The joint class closest to its TORQUE limit, and how often it is there."""
     best = (None, -1.0, 0.0)
-    for c in ("hip_roll", "hip_pitch", "knee"):
+    for c in JOINT_CLASSES:
         idx = [i for i, x in enumerate(d["classes"]) if x == c]
         if not idx:
             continue
@@ -95,6 +98,8 @@ def main() -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dir", default=None, help="trace directory")
     ap.add_argument("--scenario", default=None, help="only this scenario")
+    ap.add_argument("--robots", nargs="+", default=None,
+                    help="which robots to report (defaults to quadrupeds and hexapods)")
     ap.add_argument("--by-joint", action="store_true")
     args = ap.parse_args()
 
@@ -111,7 +116,8 @@ def main() -> int:
         "design", "policy", "u50", "u95", "sat>0.9", "past wNL", "spd p95",
         "hot joint", "tau p95", "sat>0.9")
     print(hdr); print("-" * len(hdr))
-    for r in ROBOTS:
+    target_robots = args.robots or (*ROBOTS, "tarantula", "beetle", "strider")
+    for r in target_robots:
         for f in files:
             stem = Path(f).stem
             if not stem.startswith(r + "_"):
@@ -126,7 +132,7 @@ def main() -> int:
                 r, scen, row["u50"], row["u95"], 100 * row["sat"],
                 100 * row["beyond"], row["v95"], hc or "-", ht95, 100 * hfrac))
             if args.by_joint:
-                for c in ("hip_roll", "hip_pitch", "knee"):
+                for c in JOINT_CLASSES:
                     jr = _row(data, c)
                     if jr:
                         print("%-9s   %-10s %7.3f %7.3f %7.1f%% %7.1f%% %8.3f   %-9s %7.3f" % (

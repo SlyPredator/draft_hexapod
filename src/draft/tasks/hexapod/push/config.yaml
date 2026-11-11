@@ -1,0 +1,7 @@
+# Push-robustness challenge. Warm-start from the flat base policy for this design.
+task: hexapod_push
+run_name: hexapod_push
+max_iterations: 1500
+save_interval: 250
+env_kwargs:
+  robot_xml: generated/tarantula/hexapod.xml

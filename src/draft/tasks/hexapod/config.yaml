@@ -1,0 +1,12 @@
+# Per-run config for the flat hexapod task. Keys override the defaults in
+# runner_cfg.py; omit a key (or set it null) to keep the default.
+
+task: hexapod
+run_name: hexapod_flat
+
+# ── Task inputs (forwarded to make_env_cfg via env_kwargs) ────────────────────
+# The tarantula preset; build it with `python scripts/generate_hexapods.py` or
+# `python scripts/generate_robot.py --robot hexapod --overrides src/draft/robots/hexapod/presets/tarantula.yaml --output-dir generated/tarantula --fixed-output-dir`.
+# To train another design, point this at its generated XML.
+env_kwargs:
+  robot_xml: generated/tarantula/hexapod.xml

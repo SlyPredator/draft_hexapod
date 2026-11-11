@@ -1,0 +1,7 @@
+# Rough-terrain challenge. Warm-start from the flat base policy for this design.
+task: hexapod_terrain
+run_name: hexapod_terrain
+max_iterations: 2000
+save_interval: 250
+env_kwargs:
+  robot_xml: generated/tarantula/hexapod.xml

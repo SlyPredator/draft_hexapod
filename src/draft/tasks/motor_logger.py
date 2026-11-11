@@ -108,8 +108,13 @@ class MotorLogger:
         if toks and toks[0] in ("left", "right"):
             return "_".join(toks[1:]) or name, toks[0]
         prefix = name[:3]
-        if prefix in ("fl_", "fr_", "rl_", "rr_"):
-            row = "front" if name[0] == "f" else "rear"
+        if prefix in ("fl_", "fr_", "ml_", "mr_", "rl_", "rr_"):
+            if name[0] == "f":
+                row = "front"
+            elif name[0] == "m":
+                row = "mid"
+            else:
+                row = "rear"
             side = "left" if name[1] == "l" else "right"
             return f"{row}_{name[3:]}", side
         return name, None

@@ -67,8 +67,13 @@ def require_robot_xml(env_kwargs: dict[str, Any]) -> None:
     for key in ("robot_xml", "task_geometry_xml"):
         xml = env_kwargs.get(key)
         if xml and not Path(xml).exists():
+            xml_str = str(xml)
+            if "hexapod" in xml_str:
+                hint = "  python scripts/generate_hexapods.py              # the hexapod presets: tarantula, beetle, strider\n"
+            else:
+                hint = "  python scripts/generate_quadrupeds.py            # the paper's cheetah, bear, giraffe\n"
             raise SystemExit(
                 f"{key} {xml} does not exist; generated/ is not committed, so build it first:\n"
-                "  python scripts/generate_quadrupeds.py            # the paper's cheetah, bear, giraffe\n"
-                "  python scripts/generate_robot.py --robot quadruped --output-dir <dir> --fixed-output-dir\n"
+                f"{hint}"
+                "  python scripts/generate_robot.py --robot <name> --output-dir <dir> --fixed-output-dir\n"
                 "or point env_kwargs.robot_xml in the run config at a design you have built.")
