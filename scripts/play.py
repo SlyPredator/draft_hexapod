@@ -8,9 +8,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import draft  # noqa: F401  first: loads the environment's libstdc++, see draft/__init__.py
+
 
 # Friendly error when the `rl` extra (mjlab, torch) is missing.
 def _need_rl_extra(exc: ModuleNotFoundError) -> "NoReturn":   # noqa: F821
@@ -69,6 +71,10 @@ def _parse_args() -> argparse.Namespace:
         "--rough", action="store_true", default=False,
         help="Force rough terrain generator in playback.",
     )
+    parser.add_argument(
+        "--show-curves", action="store_true", default=False,
+        help="Interactively display motor operating curve plots on exit (default saves PNG only).",
+    )
     return parser.parse_args()
 
 
@@ -93,18 +99,55 @@ def _resolve_robot_flag(robot: str, task_name: str) -> str:
 def main() -> None:
     args = _parse_args()
 
+    # ── Inspect checkpoint metadata for task and robot inference ─────────────
+    ckpt_meta: dict = {}
+    if args.checkpoint:
+        ckpt_path = Path(args.checkpoint)
+        meta_path = ckpt_path.parent / "run_meta.json"
+        if meta_path.exists():
+            try:
+                ckpt_meta = json.loads(meta_path.read_text())
+            except Exception:
+                pass
+
     # ── Resolve task + config ────────────────────────────────────────────────
-    if args.config is not None:
-        run_cfg = load_run_config(args.config)
-        task_name = args.task or run_cfg["task"]
+    meta_task = ckpt_meta.get("task")
+    if args.task is None and meta_task:
+        task_name = meta_task
+        print(f"Auto-selected task '{task_name}' from checkpoint metadata.")
     elif args.task is not None:
-        task = get_task(args.task)
-        run_cfg = load_run_config(task.default_config_yaml())
-        task_name = args.task
+        # If user passed a generic base task (e.g. 'hexapod' or 'quadruped') but the checkpoint
+        # was trained on a specialized task (e.g. 'hexapod_terrain', 'quadruped_terrain'),
+        # promote to the specialized task so the environment and ground match the policy.
+        if meta_task and args.task in ("hexapod", "quadruped") and args.task in meta_task and args.task != meta_task:
+            task_name = meta_task
+            print(f"Promoted task from '{args.task}' to '{task_name}' (matching checkpoint training task).")
+        else:
+            task_name = args.task
+    elif args.config is not None:
+        run_cfg = load_run_config(args.config)
+        task_name = run_cfg["task"]
     else:
-        raise SystemExit("Must pass --task and/or --config.")
+        # Fallback: infer from checkpoint path string if possible
+        ckpt_str = str(args.checkpoint or "").lower()
+        if "terrain" in ckpt_str:
+            task_name = (
+                "hexapod_terrain"
+                if any(h in ckpt_str for h in ("hexapod", "beetle", "tarantula", "strider"))
+                else "quadruped_terrain"
+            )
+            print(f"Auto-detected terrain task '{task_name}' from checkpoint path.")
+        elif any(h in ckpt_str for h in ("hexapod", "beetle", "tarantula", "strider")):
+            task_name = "hexapod"
+            print(f"Auto-detected task '{task_name}' from checkpoint path.")
+        else:
+            raise SystemExit("Must pass --task, --config, or a checkpoint with resolvable metadata.")
 
     task = get_task(task_name)
+    if args.config is not None:
+        run_cfg = load_run_config(args.config)
+    else:
+        run_cfg = load_run_config(task.default_config_yaml())
 
     # ── Build runner cfg with overrides ──────────────────────────────────────
     runner_cfg = task.make_runner_cfg()
@@ -112,6 +155,10 @@ def main() -> None:
     runner_cfg.env_kwargs = {**runner_cfg.env_kwargs, **run_cfg["env_kwargs"]}
     if args.robot is not None:
         runner_cfg.env_kwargs["robot_xml"] = _resolve_robot_flag(args.robot, task_name)
+    elif "robot_xml" in ckpt_meta.get("env_kwargs", {}):
+        runner_cfg.env_kwargs["robot_xml"] = ckpt_meta["env_kwargs"]["robot_xml"]
+        print(f"Auto-selected robot '{runner_cfg.env_kwargs['robot_xml']}' from checkpoint metadata.")
+
     require_robot_xml(runner_cfg.env_kwargs)
     runner_cfg.reward_overrides = {
         **runner_cfg.reward_overrides, **run_cfg["reward_overrides"]
@@ -148,9 +195,10 @@ def main() -> None:
                 env_cfg.rewards[name].weight = float(weight)
 
     # ── Match ground to what the policy was actually trained on ──────────────
-    # For flat base tasks (not the rough terrain task), show the clean flat plane.
+    # For flat base tasks, show the clean flat plane.
     # For terrain tasks (hexapod_terrain, quadruped_terrain), keep the rough generator.
-    if (args.flat or "terrain" not in task_name) and not args.rough:
+    is_terrain_task = "terrain" in task_name
+    if (args.flat or not is_terrain_task) and not args.rough:
         if env_cfg.scene.terrain is not None:
             env_cfg.scene.terrain.terrain_type = "plane"
             env_cfg.scene.terrain.terrain_generator = None
@@ -205,7 +253,7 @@ def main() -> None:
             if runner_cfg.checkpoint and runner_cfg.checkpoint != "zeros"
             else Path("motor_curves.png")
         )
-        motor_logger.plot(save_path=plot_path)
+        motor_logger.plot(save_path=plot_path, show=args.show_curves)
 
     env.close()
 
