@@ -18,6 +18,22 @@ descriptions fill in the masses, motor sizes and reflected inertias, then check
 whether the assembled machine could be built. Design variants take seconds to
 generate, and every one can be trained with the included quadruped RL tasks.
 
+## Modifications to this fork - Hexapod Locomotion
+
+This fork adds parametric 18-DoF hexapod robot generation and rough-terrain locomotion training in MuJoCo using `mjlab` and `rsl_rl`.
+
+<p align="center">
+  <img src="docs/beetle_terrain_showcase.gif" alt="Beetle Hexapod Terrain Showcase" width="100%">
+</p>
+
+### Key Additions
+
+- **Hexapod Morphology & Presets:** Extended Draft's compiler with radial polygon lofting, mirror rotations, and geometric link sizing to generate 18-DoF radially symmetric hexapod variants (`beetle`, `strider`, `tarantula`).
+- **Scaling Laws & Trends:** Fitted mass composition models, reflected inertia estimations, and structural feasibility checks for multi-legged hexapod kinematics.
+- **Locomotion Tasks & RL Environments:** Built sprawled hexapod RL environments in `mjlab` with tripod gait rewards, foot clearance penalties, and an adaptive terrain curriculum across swells, rubble, inclines, and stairs.
+- **Tooling & Visualization:** Added multi-preset rendering tools (`scripts/figures/render_hexapods.py`), checkpoint-aware policy playback (`scripts/play.py` with auto-matching ground/terrain), and training CLI overrides.
+
+
 ## Quick start
 
 ```shell
