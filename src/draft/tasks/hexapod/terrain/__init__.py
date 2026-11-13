@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import math
 from typing import TYPE_CHECKING
 
 import torch
@@ -58,11 +59,12 @@ def _hexapod_terrain_base_too_low(
 def _lin_vel_z_downward_l2(
     env: ManagerBasedRlEnv,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    max_descent_speed: float = 0.35,
 ) -> torch.Tensor:
-    """Only penalize downward vertical crashing (vz < 0); allow upward climbing (vz > 0)."""
+    """Only penalize downward crashing beyond allowed descent speed; allow climbing (vz > 0)."""
     asset = env.scene[asset_cfg.name]
     vz = asset.data.root_link_lin_vel_b[:, 2]
-    return torch.square(torch.clamp(vz, max=0.0))
+    return torch.square(torch.clamp(vz + max_descent_speed, max=0.0))
 
 
 def make_env_cfg(*, play: bool = False, terrain_scale_with_size: bool = False,
@@ -89,7 +91,7 @@ def make_env_cfg(*, play: bool = False, terrain_scale_with_size: bool = False,
         "wave_terrain": 0.20, "random_rough": 0.15,
         "hf_pyramid_slope": 0.05, "hf_pyramid_slope_inv": 0.05, "flat": 0.05,
     }
-    _STEP_FLOOR = 0.06 * ts
+    _STEP_FLOOR = 0.02 * ts
     reweighted: dict = {}
     for name, st in gen.sub_terrains.items():
         ov: dict = {}
@@ -97,6 +99,7 @@ def make_env_cfg(*, play: bool = False, terrain_scale_with_size: bool = False,
             ov["proportion"] = _HEIGHT_WEIGHTS[name]
         if "stairs" in name and hasattr(st, "step_height_range"):
             ov["step_height_range"] = (_STEP_FLOOR, st.step_height_range[1])
+            ov["step_width"] = 0.40 * ts
         if name == "random_rough" and hasattr(st, "downsampled_scale"):
             ov["downsampled_scale"] = 0.25 * ts
         reweighted[name] = replace(st, **ov) if ov else st
@@ -114,12 +117,16 @@ def make_env_cfg(*, play: bool = False, terrain_scale_with_size: bool = False,
     twist.resampling_time_range = (10.0 * s_sqrt, 20.0 * s_sqrt)
     twist.rel_standing_envs = 0.0
 
-    # ── Climbing-friendly reward shaping ──────────────────────────────────────
+    # ── Climbing & descent friendly reward shaping ────────────────────────────
     cfg.rewards["lin_vel_z"].func = _lin_vel_z_downward_l2
     cfg.rewards["lin_vel_z"].weight = -0.5 / ts
     if "foot_clearance" in cfg.rewards:
         cfg.rewards["foot_clearance"].weight = -0.40 / (ts**1.5)
         cfg.rewards["foot_clearance"].params["target_height"] = 0.12 * ts
+    if "upright" in cfg.rewards:
+        cfg.rewards["upright"].params["std"] = math.sqrt(0.35) / s_sqrt
+    if "upper_leg_contact" in cfg.rewards:
+        cfg.rewards["upper_leg_contact"].weight = -0.20
 
     # ── Robust rough-terrain terminations ─────────────────────────────────────
     cfg.terminations["out_of_terrain_bounds"] = TerminationTermCfg(

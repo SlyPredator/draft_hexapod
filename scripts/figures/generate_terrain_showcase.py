@@ -81,7 +81,7 @@ SHOWCASE_CELLS = [
     },
     {
         "title": "Ascending Stairs",
-        "sub_title": "9 cm risers",
+        "sub_title": "10 cm risers",
         "sub_name": "pyramid_stairs",
         "difficulty": 0.08,
         "x_start": -3.0,
@@ -89,22 +89,22 @@ SHOWCASE_CELLS = [
         "cam_azimuth": -45.0,
         "loop_steps": 150,
         "extra_cfg": {
-            "step_height_range": (0.09, 0.09),
+            "step_height_range": (0.10, 0.10),
             "step_width": 0.40,
             "platform_width": 4.0,
         },
     },
     {
         "title": "Descending Stairs",
-        "sub_title": "3.5 cm drops",
+        "sub_title": "10 cm drops",
         "sub_name": "pyramid_stairs_inv",
         "difficulty": 0.08,
-        "x_start": -2.5,
-        "z_start": 0.12,
+        "x_start": -3.0,
+        "z_start": 0.30,
         "cam_azimuth": 135.0,
         "loop_steps": 150,
         "extra_cfg": {
-            "step_height_range": (0.06, 0.06),
+            "step_height_range": (0.10, 0.10),
             "platform_width": 4.0,
         },
     },
@@ -309,7 +309,7 @@ def main() -> None:
     parser.add_argument(
         "--checkpoint",
         type=str,
-        default="logs/beetle_terrain_v2/2026-11-11_23-16-17_beetle_terrain_v2/model_4999.pt",
+        default="logs/beetle_terrain_v3/2026-11-12_19-09-20_beetle_terrain_v3/model_3750.pt",
         help="Path to trained policy checkpoint.",
     )
     parser.add_argument(

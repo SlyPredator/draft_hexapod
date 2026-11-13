@@ -1,0 +1,15 @@
+{
+  "task": "hexapod_terrain",
+  "run_name": "beetle_terrain_v3",
+  "config": null,
+  "env_kwargs": {
+    "robot_xml": "generated/beetle/hexapod.xml"
+  },
+  "reward_overrides": {},
+  "n_envs": 4096,
+  "max_iterations": 5000,
+  "num_steps_per_env": 24,
+  "seed": 0,
+  "timestamp": "2026-11-12_19-09-20",
+  "git_sha": "eb4a1f7"
+}
